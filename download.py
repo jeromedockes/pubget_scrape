@@ -1,3 +1,4 @@
+import argparse
 import hashlib
 import json
 import logging
@@ -28,7 +29,7 @@ _PMC_TABLE_URL_TEMPLATE = f"{_PMC_URL_TEMPLATE}/table/{{}}/?report=objectonly"
 
 
 def _sleep():
-    delay = random.uniform(5, 15)
+    delay = 2.0 + random.expovariate(1.0 / 8.0)
     logging.debug(f"Sleep for {delay:.0f} seconds")
     time.sleep(delay)
 
@@ -128,6 +129,8 @@ def _process_all_pmcids(
     all_pmcids: list[int], output_dir: pathlib.Path
 ) -> pathlib.Path:
     output_dir.mkdir(exist_ok=True, parents=True)
+    logging.info(f"Collecting data for {len(all_pmcids)} PMCIDs")
+    logging.info(f"Storing results in '{output_dir}'")
     all_coords_files = []
     n_errors = 0
     with requests.Session() as session:
@@ -167,12 +170,15 @@ if __name__ == "__main__":
         level="DEBUG", format=_LOG_FORMAT, datefmt=_LOG_DATE_FORMAT
     )
 
-    with open("pmcids.txt") as stream:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("pmcids_file", type=str)
+    parser.add_argument("output_dir", type=str)
+    args = parser.parse_args()
+
+    with open(args.pmcids_file) as stream:
         pmcids = list(map(int, stream))
 
-    pmcids = pmcids[:30]
-
-    output_dir = pathlib.Path("data")
+    output_dir = pathlib.Path(args.output_dir)
     coords_file = _process_all_pmcids(pmcids, output_dir)
 
-    print(f"\n{coords_file}")
+    print(f"{coords_file}")
