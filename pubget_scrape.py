@@ -1,4 +1,4 @@
-# /usr/bin/env python3
+#! /usr/bin/env python3
 
 """Get articles from PMC and use pubget to extract stereotactic coordinates.
 
@@ -185,9 +185,19 @@ if __name__ == "__main__":
         level="DEBUG", format=_LOG_FORMAT, datefmt=_LOG_DATE_FORMAT
     )
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("pmcids_file", type=str)
-    parser.add_argument("output_dir", type=str)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "pmcids_file",
+        type=str,
+        help="File containing PMCIDs to download, "
+        "one per line (without the 'PMC' prefix).",
+    )
+    parser.add_argument(
+        "output_dir",
+        type=str,
+        help="Directory where to store outputs "
+        "(will be created if necessary).",
+    )
     args = parser.parse_args()
 
     with open(args.pmcids_file) as stream:
